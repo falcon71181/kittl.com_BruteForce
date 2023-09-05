@@ -47,10 +47,6 @@ def brutter(user, password):
     elif response.status_code == 500:
         print(f"{Color.red_bold}Response [500] , SERVER DOWN .{Color.no_colored}")
         exit()
-    elif response.status_code == 401:
-        print(f"{Color.red_bold}Response [401] , SERVER DOWN .{Color.no_colored}")
-        exit()
-
     else:
         print(f"{Color.blue_bold}{user}:{password}{Color.no_colored}")
 
