@@ -1,5 +1,6 @@
 # kittl.com_BruteForce
 Python brute force to crack kittl.com accounts 
+#### import proxies into requests to use it on high no of combos
 ![image](https://github.com/falcon71181/kittl.com_BruteForce/assets/48170773/dda95ab6-7be3-40a9-bfba-3c0c150e82ed)
 
 
